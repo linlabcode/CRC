@@ -1,0 +1,6 @@
+# include meta data
+include LICENSE
+include README.md
+# include package files
+recursive-include crc/annotation *
+
