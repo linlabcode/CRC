@@ -27,6 +27,7 @@ from networkx.algorithms.clique import find_cliques_recursive
 # ===================================CLASSES======================================
 # ================================================================================
 
+
 class Genome(object):
     """Genome has attributes of a build name, a fasta directory and an annotation file."""
     __chrDict = dict()

@@ -1,1 +1,1 @@
-from crc.bin.crc3 import main as crc
+from crc.bin.crc3 import crc

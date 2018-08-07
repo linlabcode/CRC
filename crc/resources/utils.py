@@ -1,7 +1,6 @@
 """SET OF GENERAL UTILITY FUNCTIONS FOR SEQ DATA."""
 
-# Functions require samtools to be callable with a 'samtools' command, bamliquidator with a
-# 'bamliquidator' command, and fasta-get-markov (meme suite) with a 'fasta-get-markov' command
+# Functions require samtools to be callable with a 'samtools' command
 
 import gzip
 import os
@@ -11,6 +10,7 @@ from collections import defaultdict
 # ==================================================================
 # ==========================I/O FUNCTIONS===========================
 # ==================================================================
+
 
 def open_plus(file_name, mode='r'):
     """Open function that can handle gzip files."""

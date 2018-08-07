@@ -9,27 +9,26 @@ with open(path.join(here, 'README.md')) as f:
     long_description = f.read()
 
 setup(
-	name='crc',
-	version='1.0.0',
-	description='Core transcriptional regulatory circuitry analysis',
-	long_description=long_description,
-	url='https://github.com/linlabcode/CRC',
-	download_url = 'https://github.com/linlabcode/CRC/tarball/v1.0.0',
+        name='crc',
+        version='1.0.0',
+        description='Core transcriptional regulatory circuitry analysis',
+        long_description=long_description,
+        url='https://github.com/linlabcode/CRC',
+        download_url='https://github.com/linlabcode/CRC/tarball/v1.0.0',
 
-	classifiers=[],
+        classifiers=[],
 
-	keywords=['bioinformatics','crc', 'core', 'transcriptional', 'regulatory', 'circuitry'],
+        keywords=['bioinformatics', 'crc', 'core', 'transcriptional', 'regulatory', 'circuitry'],
 
-	packages=find_packages(),
+        packages=find_packages(),
 
-	install_requires=['numpy>=1.14.5', 'networkx>=1.8.1'],
-	extras_require={},
+        install_requires=['numpy>=1.14.5', 'networkx>=1.8.1'],
+        extras_require={},
 
-	entry_points={
-	    'console_scripts': [
-	        'crc=crc.bin.crc3:main',
-	        ]
-	    },
+        entry_points={
+            'console_scripts': [
+                'crc=crc.bin.crc3:main',
+                ]
+            },
         include_package_data=True,
-
 )

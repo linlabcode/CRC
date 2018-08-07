@@ -14,7 +14,7 @@ def parse_args(args=None):
         usage=(
             "usage: prog [options]"
             " -e [ENHANCER_FILE]"
-            " -b [BAM_FILE]"
+            " -c [CHROMOSOMES_FOLDER_PATH]"
             " -g [GENOME]"
             " -o [OUTPUTFOLDER]"
             " -n [NAME]"
@@ -78,56 +78,41 @@ def parse_args(args=None):
     return parser.parse_args(args)
 
 
-def main(args=None):
-    """Main function call."""
-    args = parse_args(args)
-
+def crc(enhancers, genome_input, chrom_path, output, analysis_name, bam=None, subpeak_file=None,
+        mask_file=None, activity_path=None, const_extension=100, number=1, motifs=False, tfs='',
+        config=''):
+    """CRC main function."""
     # =====================================================================================
     # ===============================I. PARSING ARGUMENTS==================================
     # =====================================================================================
 
-    print(args)
     genome = crc_utils.load_genome(
-        args.genome,
-        args.chrom_path,
-        mask_file=args.mask_file,
-        config_file=args.config,
+        genome_input,
+        chrom_path,
+        mask_file=mask_file,
+        config_file=config,
     )
 
     motif_database_file = genome.return_feature('motif_database')
     motif_convert_file = genome.return_feature('motif_convert')
 
     # User input files
-    enhancer_file = args.enhancers
+    enhancer_file = enhancers
 
-    if args.bam is None and args.subpeaks is None:
+    if bam is None and subpeak_file is None:
         print('ERROR: Must provide either bams for valley finding or subpeaks as a .bed')
         sys.exit()
 
-    # Set the subpeak file
-    if args.subpeaks:
-        subpeak_file = args.subpeaks
-    else:
-        subpeak_file = None
-
     # Will need to fix bams down the line to take in multiple bams
-    if args.bam:
-        bam_file_list = [bam_path for bam_path in args.bam.split(',') if bam_path]
+    if bam:
+        bam_file_list = [bam_path for bam_path in bam.split(',') if bam_path]
         print(bam_file_list)
     else:
         bam_file_list = []
 
     # Output folder and analysis name
-    print(args.output)
-    output_folder = utils.format_folder(args.output, True)
-    analysis_name = args.name
-
-    # Optional arguments
-    # Activity path
-    activity_path = args.activity
-
-    # Motif extension
-    const_extension = args.extension
+    print(output)
+    output_folder = utils.format_folder(output, True)
 
     print(
         '\n\n#======================================\n#===========I. DATA SUMMARY============\n#='
@@ -273,3 +258,27 @@ def main(args=None):
     crc_utils.format_network_output(graph, output_folder, analysis_name)
 
     print('FINISHED RUNNING CRC FOR {}'.format(analysis_name))
+
+
+def main(args=None):
+    """Main function call."""
+    args = parse_args(args)
+
+    print(args)
+
+    crc(
+        args.enhancers,
+        args.genome,
+        args.chrom_path,
+        args.output,
+        args.name,
+        bam=args.bam,
+        subpeak_file=args.subpeaks,
+        mask_file=args.mask_file,
+        activity_path=args.activity,
+        const_extension=args.extension,
+        number=args.number,
+        motifs=args.motifs,
+        tfs=args.tfs,
+        config=args.config,
+    )
