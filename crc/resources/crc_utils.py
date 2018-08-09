@@ -718,9 +718,9 @@ def format_network_output(graph, output_folder, analysis_name):
 
     # Output the network as a .ntx dictionary of lists
     network_filename = output_folder + analysis_name + '.ntx'
-    network_file = open(network_filename, 'wb')
-    network_dict_of_lists = nx.to_dict_of_lists(graph)
-    pickle.dump(network_dict_of_lists, network_file)
+    with open(network_filename, 'wb') as network_file:
+        network_dict_of_lists = nx.to_dict_of_lists(graph)
+        pickle.dump(network_dict_of_lists, network_file)
 
     # Output the adjacency list and nodelist
     node_file = output_folder + analysis_name + '_NODELIST.txt'
@@ -818,47 +818,3 @@ def format_network_output(graph, output_folder, analysis_name):
 
     factor_ranking_file = output_folder + analysis_name + '_ENRICHED_CLIQUE_FACTORS.txt'
     utils.unparse_table(factor_ranking_table, factor_ranking_file, '\t')
-
-    # Begin VSA scoring
-
-    # Initiate the graph
-    g = nx.Graph()
-
-    # Recover bidirectional edges
-    bidirectional_edges = pairs
-
-    # Fill up the graph
-    g.add_nodes_from(self_loops)
-    g.add_edges_from(bidirectional_edges)
-
-    # Find all the cliques
-    cliques = find_cliques_recursive(g)
-    clique_list = list(cliques)
-
-    print('Number of cliques:')
-    print(len(clique_list))
-
-    # Count the occurences of the TFs accross the loops
-    dico_tf_in_loops_counts = {}
-    for clique in clique_list:
-        for tf in clique:
-            if tf in dico_tf_in_loops_counts:
-                dico_tf_in_loops_counts[tf] += 1
-            else:
-                dico_tf_in_loops_counts[tf] = 1
-
-    # Calculate a score by loop
-    clique_ranking = []
-    for clique in clique_list:
-        clique_score = 0
-        for tf in clique:
-            clique_score = (float(clique_score) + (float(dico_tf_in_loops_counts[tf])))
-            clique_ranking.append((clique, clique_score / len(clique), len(clique)))
-
-
-    sort_clique_ranking = sorted(clique_ranking, reverse=True, key=lambda x: x[1])
-    clique_file = output_folder + analysis_name + '_CLIQUE_SCORES_VSA.txt'
-    utils.unparse_table(sort_clique_ranking, clique_file, '\t')
-
-    print('Top CRC:')
-    print(sort_clique_ranking[0])

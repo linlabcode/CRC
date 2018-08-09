@@ -12,7 +12,7 @@ def parse_args(args=None):
     """Argument parser."""
     parser = argparse.ArgumentParser(
         usage=(
-            "usage: prog [options]"
+            "crc [options]"
             " -e [ENHANCER_FILE]"
             " -c [CHROMOSOMES_FOLDER_PATH]"
             " -g [GENOME]"
