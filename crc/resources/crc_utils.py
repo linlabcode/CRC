@@ -301,7 +301,7 @@ def score_valley(locus, bam_list, max_read_length):
 
     """
     # Average density for all in the group
-    n_bins = locus.len() / 10
+    n_bins = locus.len() // 10
 
     # Want to make an average density gram
     density_matrix = []
@@ -309,7 +309,7 @@ def score_valley(locus, bam_list, max_read_length):
         # Calculate the extension
         extension = max_read_length - bam.get_read_lengths()[0]
         # This gives the normalized signal vector
-        signal_vector = bam.liquidateLocus(locus, n_bins, '.', extension, mmr=True)
+        signal_vector = bam.liquidate_locus(locus, n_bins, '.', extension, mmr=True)
         density_matrix.append(signal_vector)
 
     # Now get the average
