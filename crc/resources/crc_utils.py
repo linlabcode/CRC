@@ -201,9 +201,9 @@ def gene_to_enhancer(genome, enhancer_file, activity_path):
         if len(line) != header_length:
             continue
         enhancer_locus = utils.Locus(line[1], line[2], line[3], '.', line[0])
-        closest_gene_list = line[closest_index].split(',')
-        proximal_gene_list = line[proximal_index].split(',')
-        overlap_gene_list = line[overlap_index].split(',')
+        closest_gene_list = line[closest_index].split(',') if line[closest_index] else []
+        proximal_gene_list = line[proximal_index].split(',') if line[proximal_index] else []
+        overlap_gene_list = line[overlap_index].split(',') if line[overlap_index] else []
         all_gene_list = closest_gene_list + proximal_gene_list + overlap_gene_list
         all_gene_list = [gene.upper() for gene in all_gene_list]
 

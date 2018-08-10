@@ -14,3 +14,4 @@ Fix
 - Remove the deprecated ``_CLIQUE_SCORES_VSA.txt`` table, the creation
   of which was very memory consuming
 - Make the ``bam`` input work
+- Fix assigning enhancers to missing genes
