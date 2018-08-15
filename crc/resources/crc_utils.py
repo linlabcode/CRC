@@ -713,6 +713,26 @@ def build_graph(edge_dict, gene_to_enhancer_dict, output_folder, analysis_name, 
     return graph
 
 
+def get_clique_ranking(clique_list, out_degree_dict):
+        """Clique score generator."""
+        for clique in clique_list:
+            score = 0
+            for gene in clique:
+                score += out_degree_dict[gene]
+            score = score / len(clique)
+            if score > 0 and len(clique) > 2:
+                yield (clique, score)
+
+
+def pairs(self_loops, graph):
+    """Recover bidirectional edges."""
+    for n in self_loops:
+        for m in self_loops:
+            if n != m:
+                if graph.has_edge(n, m) and graph.has_edge(m, n):
+                    yield [n, m]
+
+
 def format_network_output(graph, output_folder, analysis_name):
     """Takes the networkx graph and returns all figures, tables, etc."""
 
@@ -773,47 +793,44 @@ def format_network_output(graph, output_folder, analysis_name):
     self_loop_file = output_folder + analysis_name + '_SELF_LOOPS.txt'
     utils.unparse_table(self_loops, self_loop_file, '')
 
-    # Recover bidirectional edges
-    pairs = []
-    for n in self_loops:
-        for m in self_loops:
-            if n != m:
-                if graph.has_edge(n, m) and graph.has_edge(m, n):
-                    pairs.append([n, m])
-
-    un_dir_graph = nx.from_edgelist(pairs)
+    un_dir_graph = nx.from_edgelist(pairs(self_loops, graph))
     clique_gen = find_cliques_recursive(un_dir_graph)
-    clique_list = list(clique_gen)
-
-    utils.unparse_table(clique_list, output_folder + analysis_name + '_CLIQUES_ALL.txt', '\t')
-
-    clique_ranking = []
     out_degree_dict = graph.out_degree()
 
-    for clique in clique_list:
-        score = 0
-        for gene in clique:
-            score += out_degree_dict[gene]
-        score = score / len(clique)
-        if score > 0 and len(clique) > 2:
-            clique_ranking.append((clique, score))
-
-    sort_clique_ranking = sorted(clique_ranking, reverse=True, key=lambda x: x[1])
-    clique_file = output_folder + analysis_name + '_CLIQUE_SCORES_DEGREE.txt'
-    utils.unparse_table(sort_clique_ranking, clique_file, '\t')
-
+    clique_ranking = get_clique_ranking(clique_gen, out_degree_dict)
+    
     factor_enrichment_dict = {}
-
     for factor in self_loops:
         factor_enrichment_dict[factor] = 0
-    for pair in clique_ranking:
-        c = pair[0]
-        for factor in c:
+
+    clique_len = 0
+    top_cliques = []
+    min_clique = ()
+    for clique, score in clique_ranking:
+        clique_len += 1
+        for factor in clique:
             factor_enrichment_dict[factor] += 1
+
+        # Get top 100 cliques
+        if clique_len <= 100:
+            top_cliques.append((clique, score))
+            continue
+
+        if not min_clique:    
+            min_clique = min(top_cliques, key=lambda x: x[1])
+
+        if score > min_clique[1]:
+            top_cliques.remove(min_clique)
+            top_cliques.append((clique, score))
+            min_clique = min(top_cliques, key=lambda x: x[1])
+
+    top_cliques.sort(reverse=True, key=lambda x: x[1])
+    clique_file = output_folder + analysis_name + '_CLIQUE_SCORES_DEGREE.txt'
+    utils.unparse_table(top_cliques, clique_file, '\t')
 
     factor_ranking_table = []
     for factor in self_loops:
-        newline = [factor, factor_enrichment_dict[factor] / float(len(clique_ranking))]
+        newline = [factor, factor_enrichment_dict[factor] / float(clique_len)]
         factor_ranking_table.append(newline)
 
     factor_ranking_file = output_folder + analysis_name + '_ENRICHED_CLIQUE_FACTORS.txt'

@@ -9,6 +9,11 @@ Added
 -----
 - Make ``crc`` a callable python function
 
+Changed
+-------
+- Remove ``_CLIQUES_ALL.txt`` table from the outputs and report only
+  the top 100 ranked cliques in the ``_CLIQUE_SCORES_DEGREE.txt`` table
+
 Fix
 ---
 - Remove the deprecated ``_CLIQUE_SCORES_VSA.txt`` table, the creation
