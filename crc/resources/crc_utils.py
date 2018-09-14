@@ -151,7 +151,8 @@ def gene_to_enhancer(genome, enhancer_file, activity_path):
         # (basically not NM or NR and not a numeral)
         for i in range(len(activity_table[0])):
             # Assumes refseq
-            if activity_table[0][i][0:2] != 'NM' and activity_table[0][i][0:2] != 'NR':
+            if (activity_table[0][i][0:2] != 'NM' and activity_table[0][i][0:2] != 'NR'
+                    and not activity_table[0][i].isdigit()):
                 gene_col = i
                 break
         print(

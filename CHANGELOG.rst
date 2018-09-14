@@ -20,3 +20,4 @@ Fix
   of which was very memory consuming
 - Make the ``bam`` input work
 - Fix assigning enhancers to missing genes
+- Fix identifying gene column in activity file
