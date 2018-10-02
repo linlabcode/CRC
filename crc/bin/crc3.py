@@ -30,7 +30,7 @@ def parse_args(args=None):
     parser.add_argument("-g", "--genome", dest="genome", default=None, type=str,
                         help=(
                             "Provide the build of the genome to be used for the analysis. "
-                            "Currently supports HG19, HG18 and MM9"
+                            "Currently supports HG19, MM10, and RN6"
                         ), required=True)
     parser.add_argument("-c", "--chrom-path", dest="chrom_path", type=str,
                         help=(

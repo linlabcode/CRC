@@ -6,7 +6,6 @@
 import gzip
 import os
 import subprocess
-from collections import defaultdict
 
 # ==================================================================
 # ==========================I/O FUNCTIONS===========================
@@ -508,51 +507,6 @@ class Bam(object):
     def get_read_lengths(self):
         """Get read lengths."""
         return self._read_lengths
-
-    def get_raw_reads(self, locus, sense, unique=False, include_jxn_reads=False,
-                      print_command=False):
-        """Gets raw reads from the bam using samtools view.
-
-        Can enforce uniqueness and strandedness.
-
-        """
-        locus_line = locus.chr + ':' + str(locus.start) + '-' + str(locus.end)
-
-        command = '{} view {} {}'.format('samtools', self._bam, locus_line)
-        if print_command:
-            print(command)
-        get_reads = subprocess.Popen(
-            command,
-            stdin=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            shell=True,
-        )
-        reads = get_reads.communicate()
-        reads = reads[0].decode('utf-8').split('\n')[:-1]
-        reads = [read.split('\t') for read in reads]
-        if not include_jxn_reads:
-            reads = filter(lambda x: x[5].count('N') < 1, reads)
-
-        kept_reads = []
-        seq_dict = defaultdict(int)
-        if sense == '-':
-            strand = ['+', '-']
-            strand.remove(locus.sense)
-            strand = strand[0]
-        else:
-            strand = locus.sense
-        for read in reads:
-            read_strand = convert_bitwise_flag(read[1])
-
-            if sense == 'both' or sense == '.' or read_strand == strand:
-                if unique and seq_dict[read[9]] == 0:
-                    kept_reads.append(read)
-                elif not unique:
-                    kept_reads.append(read)
-            seq_dict[read[9]] += 1
-
-        return kept_reads
 
     def liquidate_locus(self, locus, n=1, sense='.', extension=0, mmr=False):
         """Use bamliquidator on a locus."""

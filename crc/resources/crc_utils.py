@@ -3,15 +3,6 @@
 # Functions require fasta-get-markov to be callable with a 'fasta-get-markov' command
 # and fimo with 'fimo' command. Both are part of the MEME suite.
 
-######################
-#
-# Core Regulatory Circuits
-# Young and Bradner Labs
-# Version 1.0
-# 140724
-#
-######################
-
 import pickle
 import subprocess
 import sys
@@ -720,7 +711,7 @@ def get_clique_ranking(clique_list, out_degree_dict):
             score = 0
             for gene in clique:
                 score += out_degree_dict[gene]
-            score = score / len(clique)
+            score = float(score) / len(clique)
             if score > 0 and len(clique) > 2:
                 yield (clique, score)
 
@@ -799,7 +790,7 @@ def format_network_output(graph, output_folder, analysis_name):
     out_degree_dict = graph.out_degree()
 
     clique_ranking = get_clique_ranking(clique_gen, out_degree_dict)
-    
+
     factor_enrichment_dict = {}
     for factor in self_loops:
         factor_enrichment_dict[factor] = 0
@@ -817,7 +808,7 @@ def format_network_output(graph, output_folder, analysis_name):
             top_cliques.append((clique, score))
             continue
 
-        if not min_clique:    
+        if not min_clique:
             min_clique = min(top_cliques, key=lambda x: x[1])
 
         if score > min_clique[1]:

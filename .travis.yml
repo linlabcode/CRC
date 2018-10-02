@@ -1,0 +1,44 @@
+dist: trusty
+language: python
+
+addons:
+    apt:
+        packages:
+            - zlib1g-dev
+            - samtools
+
+before_cache:   # prevent logs from caching
+    - rm -f $HOME/.cache/pip/log/debug.log
+
+cache:
+    - ccache
+    - pip
+
+install:
+    - pip install tox
+    # install MEME suite
+    - wget http://meme-suite.org/meme-software/5.0.2/meme-5.0.2.tar.gz
+    - tar -zxvf meme-5.0.2.tar.gz
+    - pushd meme-5.0.2 && ./configure --enable-build-libxml2 --enable-build-libxslt && make && popd
+    - export PATH=$PATH:$PWD/meme-5.0.2/src:$PATH
+
+matrix:
+  include:
+    - env: TOX_ENV=py27
+      python: "2.7"
+    - env: TOX_ENV=py36
+      python: "3.6"
+    - env: TOX_ENV=linters
+      python: "3.6"
+    - env: TOX_ENV=packaging
+      python: "3.6"
+
+script:
+  - tox -e $TOX_ENV
+
+after_success:
+  - pip install codecov
+  - codecov -e TOX_ENV
+
+notifications:
+    email: false
