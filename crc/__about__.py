@@ -9,7 +9,7 @@ __download_url__ = 'https://github.com/linlabcode/CRC/tarball/v1.0.0'
 
 # Semantic versioning is used. For more information see:
 # https://packaging.python.org/en/latest/distributing/#semantic-versioning-preferred
-__version__ = '1.0.0'
+__version__ = '2.0.0a1'
 
 __maintainer__ = 'Jost Vrabic Koren'
 
