@@ -45,6 +45,14 @@ As a python library::
   import crc
 
   crc.crc(enhancers, genome_input, chrom_path, output, analysis_name, bam=None, subpeak_file=None,
-          mask_file=None, activity_path=None, const_extension=100, number=1, motifs=False, tfs='',
+          mask_file=None, activity_path=None, const_extension=100, number=1, motifs=None,
           config='')
+
+Authors
+=======
+
+Charles Y. Lin
+Donald R. Polaski
+Jost V. Koren
+Alexander J. Federation
 
