@@ -86,6 +86,9 @@ def load_genome(genome_build, chrom_path, mask_file=None, config_file=''):
 
     genome_build = genome_build.upper()
 
+    if mask_file:
+        genome_dict[genome_build]['mask'] = mask_file
+
     # Allow an optional config file to overwrite default paths
     if config_file:
         config_table = utils.parse_table(config_file, '\t')
@@ -107,9 +110,7 @@ def load_genome(genome_build, chrom_path, mask_file=None, config_file=''):
     genome.add_feature('tf_file', genome_dict[genome_build]['tf_file'])
     genome.add_feature('motif_convert', genome_dict[genome_build]['motif_convert'])
     genome.add_feature('motif_database', genome_dict[genome_build]['motif_database'])
-    if mask_file:
-        genome.add_feature('mask', mask_file)
-    else:
+    if 'mask' in genome_dict[genome_build]:
         genome.add_feature('mask', genome_dict[genome_build]['mask'])
 
     return genome

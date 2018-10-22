@@ -22,3 +22,4 @@ Fix
 - Make the ``bam`` input work
 - Fix assigning enhancers to missing genes
 - Fix identifying gene column in activity file
+- Make the ``mask_file`` input work
