@@ -73,23 +73,23 @@ def load_genome(genome_build, chrom_path, mask_file=None, config_file=""):
         "HG19": {
             "tf_file": "{}/annotation/TFlist_NMid_hg19.txt".format(ROOT_DIR),
             "mask": "{}/annotation/hg19_encode_blacklist.bed".format(ROOT_DIR),
-            "motif_convert": "{}/annotation/MotifDictionary.txt".format(ROOT_DIR),
+            'motif_convert': '{}/annotation/MotifDictionary_Homo_sapiens.txt'.format(ROOT_DIR),
             "motif_database": "{}/annotation/VertebratePWMs.txt".format(ROOT_DIR),
         },
         "HG38": {
             "tf_file": "{}/annotation/TFlist_NMid_hg19.txt".format(ROOT_DIR),
             "mask": "{}/annotation/hg38_encode_blacklist.bed".format(ROOT_DIR),
-            "motif_convert": "{}/annotation/MotifDictionary.txt".format(ROOT_DIR),
+            "motif_convert": "{}/annotation/MotifDictionary_Homo_sapiens.txt".format(ROOT_DIR),
             "motif_database": "{}/annotation/VertebratePWMs.txt".format(ROOT_DIR),
         },
         "RN6": {
             "tf_file": "{}/annotation/TFlist_NMid_rn6.txt".format(ROOT_DIR),
-            "motif_convert": "{}/annotation/MotifDictionary.txt".format(ROOT_DIR),
+            'motif_convert': '{}/annotation/MotifDictionary_Mus_musculus.txt'.format(ROOT_DIR),
             "motif_database": "{}/annotation/VertebratePWMs.txt".format(ROOT_DIR),
         },
         "MM10": {
             "tf_file": "{}/annotation/TFlist_NMid_mm10.txt".format(ROOT_DIR),
-            "motif_convert": "{}/annotation/MotifDictionary.txt".format(ROOT_DIR),
+            'motif_convert': '{}/annotation/MotifDictionary_Mus_musculus.txt'.format(ROOT_DIR),
             "motif_database": "{}/annotation/VertebratePWMs.txt".format(ROOT_DIR),
         },
     }

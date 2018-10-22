@@ -15,6 +15,31 @@ Added
   files
 - Add inputs and outputs description to the README file
 - Add support for subpeak files in ``narrowPeak`` format
+- Add new motifs for numerous TFs that already had at least one motif
+  and add motifs for 23 TFs that didn't yet have a motif:
+
+  -``ASCL1``
+  -``BATF``
+  -``BCL11A``
+  -``BHLHB3``
+  -``HES1``
+  -``HES5``
+  -``HES6``
+  -``HSFY2``
+  -``KLF2``
+  -``MYF5``
+  -``NEUROD1``
+  -``NFYC``
+  -``NOTCH1``
+  -``PAX8``
+  -``RAXL1``
+  -``RBPJ``
+  -``SIX5``
+  -``TAL1``
+  -``TP73``
+  -``YAP1``
+  -``YBX1``
+  -``ZNF20``
 
 Changed
 -------
