@@ -1,6 +1,12 @@
 # include meta data
 include LICENSE
 include README.md
+include CHANGELOG.rst
 # include package files
 recursive-include crc/annotation *
-
+# include tests and test files
+include pytest.ini tox.ini
+recursive-include tests *.py
+recursive-exclude crc/tests *
+recursive-include crc/tests *.py
+recursive-include crc/tests/files *

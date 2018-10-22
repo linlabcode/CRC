@@ -1,11 +1,11 @@
 """SET OF GENERAL UTILITY FUNCTIONS FOR SEQ DATA."""
 
-# Functions require samtools to be callable with a 'samtools' command
+# Functions require samtools to be callable with a 'samtools' command and bamliquidator to be
+# callable with a 'bamliquidator' command
 
 import gzip
 import os
 import subprocess
-from collections import defaultdict
 
 # ==================================================================
 # ==========================I/O FUNCTIONS===========================
@@ -464,8 +464,13 @@ class Bam(object):
         stat_lines = stats.stdout.readlines()
         stats.stdout.close()
 
-        self._mapped_reads = sum([int(line.rstrip().split('\t')[-2]) for line in stat_lines])
-        self._total_reads = self._mapped_reads + int(stat_lines[-1].rstrip().split('\t')[-1])
+        self._mapped_reads = sum(
+            [int(line.decode('utf-8').rstrip().split('\t')[-2]) for line in stat_lines]
+        )
+        self._total_reads = (
+            self._mapped_reads +
+            int(stat_lines[-1].decode('utf-8').rstrip().split('\t')[-1])
+        )
 
         # Now get the readlength #check the first 1000 reads
         view_command = '{} view {} chr1:90000000-100000000'.format('samtools', self._bam)
@@ -491,9 +496,9 @@ class Bam(object):
             read_stat_lines = read_stats.stdout.readlines()
             read_stats.stdout.close()
 
-        self._read_lengths = uniquify(
-            [len(line.split('\t')[9]) for line in read_stat_lines if len(line) > 0]
-        )
+        self._read_lengths = uniquify([
+            len(line.decode('utf-8').split('\t')[9]) for line in read_stat_lines if len(line) > 0
+        ])
 
     def path(self):
         """Return bam file path."""
@@ -503,50 +508,30 @@ class Bam(object):
         """Get read lengths."""
         return self._read_lengths
 
-    def get_raw_reads(self, locus, sense, unique=False, include_jxn_reads=False,
-                      print_command=False):
-        """Gets raw reads from the bam using samtools view.
-
-        Can enforce uniqueness and strandedness.
-
-        """
-        locus_line = locus.chr + ':' + str(locus.start) + '-' + str(locus.end)
-
-        command = '{} view {} {}'.format('samtools', self._bam, locus_line)
-        if print_command:
-            print(command)
-        get_reads = subprocess.Popen(
-            command,
-            stdin=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+    def liquidate_locus(self, locus, n=1, sense='.', extension=0, mmr=False):
+        """Use bamliquidator on a locus."""
+        bamliquidator_cmd = (
+            'bamliquidator {} {} {} {} {} {} {}'.format(
+                self._bam,
+                locus.chr,
+                str(locus.start),
+                str(locus.end),
+                sense,
+                n,
+                extension,
+            )
+        )
+        bamliquidator_out = subprocess.Popen(
+            bamliquidator_cmd,
             stdout=subprocess.PIPE,
             shell=True,
         )
-        reads = get_reads.communicate()
-        reads = reads[0].split('\n')[:-1]
-        reads = [read.split('\t') for read in reads]
-        if not include_jxn_reads:
-            reads = filter(lambda x: x[5].count('N') < 1, reads)
+        score = [int(x.decode('utf-8').rstrip()) for x in bamliquidator_out.stdout.readlines()]
+        if mmr:
+            mmr_count = float(self._mapped_reads) / 1000000
+            score = [round(x/mmr_count, 4) for x in score]
 
-        kept_reads = []
-        seq_dict = defaultdict(int)
-        if sense == '-':
-            strand = ['+', '-']
-            strand.remove(locus.sense)
-            strand = strand[0]
-        else:
-            strand = locus.sense
-        for read in reads:
-            read_strand = convert_bitwise_flag(read[1])
-
-            if sense == 'both' or sense == '.' or read_strand == strand:
-                if unique and seq_dict[read[9]] == 0:
-                    kept_reads.append(read)
-                elif not unique:
-                    kept_reads.append(read)
-            seq_dict[read[9]] += 1
-
-        return kept_reads
+        return score
 
 
 # ==================================================================

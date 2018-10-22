@@ -3,15 +3,6 @@
 # Functions require fasta-get-markov to be callable with a 'fasta-get-markov' command
 # and fimo with 'fimo' command. Both are part of the MEME suite.
 
-######################
-#
-# Core Regulatory Circuits
-# Young and Bradner Labs
-# Version 1.0
-# 140724
-#
-######################
-
 import pickle
 import subprocess
 import sys
@@ -95,6 +86,9 @@ def load_genome(genome_build, chrom_path, mask_file=None, config_file=''):
 
     genome_build = genome_build.upper()
 
+    if mask_file:
+        genome_dict[genome_build]['mask'] = mask_file
+
     # Allow an optional config file to overwrite default paths
     if config_file:
         config_table = utils.parse_table(config_file, '\t')
@@ -116,9 +110,7 @@ def load_genome(genome_build, chrom_path, mask_file=None, config_file=''):
     genome.add_feature('tf_file', genome_dict[genome_build]['tf_file'])
     genome.add_feature('motif_convert', genome_dict[genome_build]['motif_convert'])
     genome.add_feature('motif_database', genome_dict[genome_build]['motif_database'])
-    if mask_file:
-        genome.add_feature('mask', mask_file)
-    else:
+    if 'mask' in genome_dict[genome_build]:
         genome.add_feature('mask', genome_dict[genome_build]['mask'])
 
     return genome
@@ -151,7 +143,8 @@ def gene_to_enhancer(genome, enhancer_file, activity_path):
         # (basically not NM or NR and not a numeral)
         for i in range(len(activity_table[0])):
             # Assumes refseq
-            if activity_table[0][i][0:2] != 'NM' and activity_table[0][i][0:2] != 'NR':
+            if (activity_table[0][i][0:2] != 'NM' and activity_table[0][i][0:2] != 'NR'
+                    and not activity_table[0][i].isdigit()):
                 gene_col = i
                 break
         print(
@@ -201,9 +194,9 @@ def gene_to_enhancer(genome, enhancer_file, activity_path):
         if len(line) != header_length:
             continue
         enhancer_locus = utils.Locus(line[1], line[2], line[3], '.', line[0])
-        closest_gene_list = line[closest_index].split(',')
-        proximal_gene_list = line[proximal_index].split(',')
-        overlap_gene_list = line[overlap_index].split(',')
+        closest_gene_list = line[closest_index].split(',') if line[closest_index] else []
+        proximal_gene_list = line[proximal_index].split(',') if line[proximal_index] else []
+        overlap_gene_list = line[overlap_index].split(',') if line[overlap_index] else []
         all_gene_list = closest_gene_list + proximal_gene_list + overlap_gene_list
         all_gene_list = [gene.upper() for gene in all_gene_list]
 
@@ -301,7 +294,7 @@ def score_valley(locus, bam_list, max_read_length):
 
     """
     # Average density for all in the group
-    n_bins = locus.len() / 10
+    n_bins = locus.len() // 10
 
     # Want to make an average density gram
     density_matrix = []
@@ -309,7 +302,7 @@ def score_valley(locus, bam_list, max_read_length):
         # Calculate the extension
         extension = max_read_length - bam.get_read_lengths()[0]
         # This gives the normalized signal vector
-        signal_vector = bam.liquidateLocus(locus, n_bins, '.', extension, mmr=True)
+        signal_vector = bam.liquidate_locus(locus, n_bins, '.', extension, mmr=True)
         density_matrix.append(signal_vector)
 
     # Now get the average
@@ -713,14 +706,34 @@ def build_graph(edge_dict, gene_to_enhancer_dict, output_folder, analysis_name, 
     return graph
 
 
+def get_clique_ranking(clique_list, out_degree_dict):
+        """Clique score generator."""
+        for clique in clique_list:
+            score = 0
+            for gene in clique:
+                score += out_degree_dict[gene]
+            score = float(score) / len(clique)
+            if score > 0 and len(clique) > 2:
+                yield (clique, score)
+
+
+def pairs(self_loops, graph):
+    """Recover bidirectional edges."""
+    for n in self_loops:
+        for m in self_loops:
+            if n != m:
+                if graph.has_edge(n, m) and graph.has_edge(m, n):
+                    yield [n, m]
+
+
 def format_network_output(graph, output_folder, analysis_name):
     """Takes the networkx graph and returns all figures, tables, etc."""
 
     # Output the network as a .ntx dictionary of lists
     network_filename = output_folder + analysis_name + '.ntx'
-    network_file = open(network_filename, 'wb')
-    network_dict_of_lists = nx.to_dict_of_lists(graph)
-    pickle.dump(network_dict_of_lists, network_file)
+    with open(network_filename, 'wb') as network_file:
+        network_dict_of_lists = nx.to_dict_of_lists(graph)
+        pickle.dump(network_dict_of_lists, network_file)
 
     # Output the adjacency list and nodelist
     node_file = output_folder + analysis_name + '_NODELIST.txt'
@@ -773,92 +786,45 @@ def format_network_output(graph, output_folder, analysis_name):
     self_loop_file = output_folder + analysis_name + '_SELF_LOOPS.txt'
     utils.unparse_table(self_loops, self_loop_file, '')
 
-    # Recover bidirectional edges
-    pairs = []
-    for n in self_loops:
-        for m in self_loops:
-            if n != m:
-                if graph.has_edge(n, m) and graph.has_edge(m, n):
-                    pairs.append([n, m])
-
-    un_dir_graph = nx.from_edgelist(pairs)
+    un_dir_graph = nx.from_edgelist(pairs(self_loops, graph))
     clique_gen = find_cliques_recursive(un_dir_graph)
-    clique_list = list(clique_gen)
-
-    utils.unparse_table(clique_list, output_folder + analysis_name + '_CLIQUES_ALL.txt', '\t')
-
-    clique_ranking = []
     out_degree_dict = graph.out_degree()
 
-    for clique in clique_list:
-        score = 0
-        for gene in clique:
-            score += out_degree_dict[gene]
-        score = score / len(clique)
-        if score > 0 and len(clique) > 2:
-            clique_ranking.append((clique, score))
-
-    sort_clique_ranking = sorted(clique_ranking, reverse=True, key=lambda x: x[1])
-    clique_file = output_folder + analysis_name + '_CLIQUE_SCORES_DEGREE.txt'
-    utils.unparse_table(sort_clique_ranking, clique_file, '\t')
+    clique_ranking = get_clique_ranking(clique_gen, out_degree_dict)
 
     factor_enrichment_dict = {}
-
     for factor in self_loops:
         factor_enrichment_dict[factor] = 0
-    for pair in clique_ranking:
-        c = pair[0]
-        for factor in c:
+
+    clique_len = 0
+    top_cliques = []
+    min_clique = ()
+    for clique, score in clique_ranking:
+        clique_len += 1
+        for factor in clique:
             factor_enrichment_dict[factor] += 1
+
+        # Get top 100 cliques
+        if clique_len <= 100:
+            top_cliques.append((clique, score))
+            continue
+
+        if not min_clique:
+            min_clique = min(top_cliques, key=lambda x: x[1])
+
+        if score > min_clique[1]:
+            top_cliques.remove(min_clique)
+            top_cliques.append((clique, score))
+            min_clique = min(top_cliques, key=lambda x: x[1])
+
+    top_cliques.sort(reverse=True, key=lambda x: x[1])
+    clique_file = output_folder + analysis_name + '_CLIQUE_SCORES_DEGREE.txt'
+    utils.unparse_table(top_cliques, clique_file, '\t')
 
     factor_ranking_table = []
     for factor in self_loops:
-        newline = [factor, factor_enrichment_dict[factor] / float(len(clique_ranking))]
+        newline = [factor, factor_enrichment_dict[factor] / float(clique_len)]
         factor_ranking_table.append(newline)
 
     factor_ranking_file = output_folder + analysis_name + '_ENRICHED_CLIQUE_FACTORS.txt'
     utils.unparse_table(factor_ranking_table, factor_ranking_file, '\t')
-
-    # Begin VSA scoring
-
-    # Initiate the graph
-    g = nx.Graph()
-
-    # Recover bidirectional edges
-    bidirectional_edges = pairs
-
-    # Fill up the graph
-    g.add_nodes_from(self_loops)
-    g.add_edges_from(bidirectional_edges)
-
-    # Find all the cliques
-    cliques = find_cliques_recursive(g)
-    clique_list = list(cliques)
-
-    print('Number of cliques:')
-    print(len(clique_list))
-
-    # Count the occurences of the TFs accross the loops
-    dico_tf_in_loops_counts = {}
-    for clique in clique_list:
-        for tf in clique:
-            if tf in dico_tf_in_loops_counts:
-                dico_tf_in_loops_counts[tf] += 1
-            else:
-                dico_tf_in_loops_counts[tf] = 1
-
-    # Calculate a score by loop
-    clique_ranking = []
-    for clique in clique_list:
-        clique_score = 0
-        for tf in clique:
-            clique_score = (float(clique_score) + (float(dico_tf_in_loops_counts[tf])))
-            clique_ranking.append((clique, clique_score / len(clique), len(clique)))
-
-
-    sort_clique_ranking = sorted(clique_ranking, reverse=True, key=lambda x: x[1])
-    clique_file = output_folder + analysis_name + '_CLIQUE_SCORES_VSA.txt'
-    utils.unparse_table(sort_clique_ranking, clique_file, '\t')
-
-    print('Top CRC:')
-    print(sort_clique_ranking[0])
