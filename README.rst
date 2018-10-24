@@ -51,8 +51,11 @@ As a python library::
 Authors
 =======
 
-Charles Y. Lin
+Charles Y. Lin Baylor College of Medicine
+
+Jost V. Koren Baylor College of Medicine
+
+Alexander J. Federation University of Washington
+
 Donald R. Polaski
-Jost V. Koren
-Alexander J. Federation
 
