@@ -11,6 +11,8 @@ Unreleased
 
 Added
 -----
+- Suport ``hg38`` genome and add ``hg19`` and ``hg38`` blacklist bed
+  files
 
 Changed
 -------
