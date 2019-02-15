@@ -72,6 +72,12 @@ def load_genome(genome_build, chrom_path, mask_file=None, config_file=''):
             'motif_convert': '{}/annotation/MotifDictionary.txt'.format(ROOT_DIR),
             'motif_database': '{}/annotation/VertebratePWMs.txt'.format(ROOT_DIR),
         },
+        'HG38': {
+            'tf_file': '{}/annotation/TFlist_NMid_hg19.txt'.format(ROOT_DIR),
+            'mask': '{}/annotation/hg38_encode_blacklist.bed'.format(ROOT_DIR),
+            'motif_convert': '{}/annotation/MotifDictionary.txt'.format(ROOT_DIR),
+            'motif_database': '{}/annotation/VertebratePWMs.txt'.format(ROOT_DIR),
+        },
         'RN6': {
             'tf_file': '{}/annotation/TFlist_NMid_rn6.txt'.format(ROOT_DIR),
             'motif_convert': '{}/annotation/MotifDictionary.txt'.format(ROOT_DIR),
