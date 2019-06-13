@@ -19,6 +19,7 @@ Changed
 
 Fixed
 -----
+- Remove unused ``tfs`` parameter
 
 
 ================
