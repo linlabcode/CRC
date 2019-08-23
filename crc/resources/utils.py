@@ -573,7 +573,7 @@ def fetch_seq(directory, chrom, start, end, UCSC=False, line_breaks=True, header
     The directory must contain individual chrom fasta files.
 
     """
-    file_name = directory + chrom + '.fa'
+    file_name = os.path.join(directory, '{}{}'.format(chrom, '.fa'))
     header_offset = 0
     n_start = 0
     n_end = 0

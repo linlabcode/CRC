@@ -21,6 +21,8 @@ Changed
 Fixed
 -----
 - Remove unused ``tfs`` parameter
+- Fix ``chrom_path`` input formatting so it does not require '/' at the
+  end
 
 
 ================
