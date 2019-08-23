@@ -14,6 +14,7 @@ Added
 - Suport ``hg38`` genome and add ``hg19`` and ``hg38`` blacklist bed
   files
 - Add inputs and outputs description to the README file
+- Add support for subpeak files in ``narrowPeak`` format
 
 Changed
 -------
@@ -21,8 +22,8 @@ Changed
 Fixed
 -----
 - Remove unused ``tfs`` parameter
-- Fix ``chrom_path`` input formatting so it does not require '/' at the
-  end
+- Fix ``chrom_path`` input formatting so it does not require a '/' at
+  the end
 
 
 ================
