@@ -66,11 +66,6 @@ def parse_args(args=None):
                         ), required=False)
     parser.add_argument("--motifs", dest="motifs", default=False, type=str,
                         help="Enter additional PWM file for the analysis", required=False)
-    parser.add_argument("-t", "--tfs", dest="tfs", default=None, type=str,
-                        help=(
-                            "Enter additional TFs (comma separated) to be used in the bindinf "
-                            "analysis"
-                        ), required=False)
     parser.add_argument("--config", dest="config", default='', type=str,
                         help="Enter genome configuration file to overwrite default paths",
                         required=False)
@@ -79,7 +74,7 @@ def parse_args(args=None):
 
 
 def crc(enhancers, genome_input, chrom_path, output, analysis_name, bam=None, subpeak_file=None,
-        mask_file=None, activity_path=None, const_extension=100, number=1, motifs=False, tfs='',
+        mask_file=None, activity_path=None, const_extension=100, number=1, motifs=False,
         config=''):
     """CRC main function."""
     # =====================================================================================
@@ -279,6 +274,5 @@ def main(args=None):
         const_extension=args.extension,
         number=args.number,
         motifs=args.motifs,
-        tfs=args.tfs,
         config=args.config,
     )

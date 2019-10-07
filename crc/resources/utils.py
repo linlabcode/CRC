@@ -87,7 +87,7 @@ def import_bound_region(bound_region_file, name):
     bound = parse_table(bound_region_file, '\t')
     loci_list = []
     ticker = 1
-    bed = bool(bound_region_file.split('.')[-1] == 'bed')
+    bed = bool(bound_region_file.split('.')[-1] in ['bed', 'narrowPeak'])
     if bed:
         for line in bound:
             if len(line) < 3:
@@ -573,7 +573,7 @@ def fetch_seq(directory, chrom, start, end, UCSC=False, line_breaks=True, header
     The directory must contain individual chrom fasta files.
 
     """
-    file_name = directory + chrom + '.fa'
+    file_name = os.path.join(directory, '{}{}'.format(chrom, '.fa'))
     header_offset = 0
     n_start = 0
     n_end = 0
