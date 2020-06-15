@@ -18,6 +18,6 @@ __email__ = 'jost.koren@bcm.edu'
 __license__ = 'MIT'
 
 __all__ = (
-    '__title__', '__summary__', '__url__', '__version__', '__maintainer__',  '__license__',
+    '__title__', '__summary__', '__url__', '__version__', '__maintainer__', '__license__',
     '__email__',
 )

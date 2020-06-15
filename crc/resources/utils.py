@@ -12,10 +12,10 @@ import subprocess
 # ==================================================================
 
 
-def open_plus(file_name, mode='r'):
+def open_plus(file_name, mode="r"):
     """Open function that can handle gzip files."""
-    if file_name.split('.')[-1] == 'gz':
-        return gzip.open(file_name, mode + 'b')
+    if file_name.split(".")[-1] == "gz":
+        return gzip.open(file_name, mode + "b")
     return open(file_name, mode)
 
 
@@ -25,7 +25,7 @@ def parse_table(file_name, sep, header=False, excel=False):
         line = infile.readline()
 
         # First figure out if this table came from excel and has \r for line breaks
-        if line.count('\r') > 0:
+        if line.count("\r") > 0:
             excel = True
 
     with open_plus(file_name) as infile:
@@ -36,7 +36,7 @@ def parse_table(file_name, sep, header=False, excel=False):
         if excel:
             lines_raw = infile.readlines()
             for line in lines_raw:
-                line = line.replace('\r', '')
+                line = line.replace("\r", "")
                 line = line.rstrip()
                 table.append(line.split(sep))
         else:
@@ -49,13 +49,13 @@ def parse_table(file_name, sep, header=False, excel=False):
 
 def unparse_table(table, output, sep):
     """Transforms a 'parse_table' output into a text file."""
-    with open_plus(output, 'w') as fh_out:
+    with open_plus(output, "w") as fh_out:
         if not sep:
             for i in table:
-                fh_out.write(str(i) + '\n')
+                fh_out.write(str(i) + "\n")
         else:
             for line in table:
-                fh_out.write(sep.join([str(x) for x in line]) + '\n')
+                fh_out.write(sep.join([str(x) for x in line]) + "\n")
 
 
 def format_folder(folder_name, create=False):
@@ -64,14 +64,14 @@ def format_folder(folder_name, create=False):
     If 'create=True' it creates a folder if it doesn't exist already.
 
     """
-    if folder_name[-1] != '/':
-        folder_name += '/'
+    if folder_name[-1] != "/":
+        folder_name += "/"
 
     try:
         os.listdir(folder_name)
         return folder_name
     except OSError:
-        print('Folder {} does not exist'.format(folder_name))
+        print("Folder {} does not exist".format(folder_name))
         if create:
             os.mkdir(folder_name)
             return folder_name
@@ -82,12 +82,13 @@ def format_folder(folder_name, create=False):
 # ===================ANNOTATION FUNCTIONS===========================
 # ==================================================================
 
+
 def import_bound_region(bound_region_file, name):
     """Imports bound regions in either bed format or in error model format."""
-    bound = parse_table(bound_region_file, '\t')
+    bound = parse_table(bound_region_file, "\t")
     loci_list = []
     ticker = 1
-    bed = bool(bound_region_file.split('.')[-1] in ['bed', 'narrowPeak'])
+    bed = bool(bound_region_file.split(".")[-1] in ["bed", "narrowPeak"])
     if bed:
         for line in bound:
             if len(line) < 3:
@@ -99,8 +100,8 @@ def import_bound_region(bound_region_file, name):
                     line[0],
                     int(line[1]),
                     int(line[2]),
-                    '.',
-                    ID=name + '_' + str(ticker),
+                    ".",
+                    ID=name + "_" + str(ticker),
                 )
             )
             ticker = ticker + 1
@@ -110,11 +111,11 @@ def import_bound_region(bound_region_file, name):
                 print(ticker)
             loci_list.append(
                 Locus(
-                    'chr' + line[0],
+                    "chr" + line[0],
                     int(line[1]),
                     int(line[2]),
-                    '.',
-                    ID=name + '_' + str(ticker),
+                    ".",
+                    ID=name + "_" + str(ticker),
                 )
             )
             ticker = ticker + 1
@@ -128,12 +129,14 @@ def import_bound_region(bound_region_file, name):
 
 # Locus and LocusCollection instances courtesy of Graham Ruby
 
+
 class Locus(object):
     """Standard locus class for tracking genomic loci."""
-    __chr_dict = dict()
-    __sense_dict = {'+': '+', '-': '-', '.': '.'}
 
-    def __init__(self, chr, start, end, sense, ID='', score=0):
+    __chr_dict = dict()
+    __sense_dict = {"+": "+", "-": "-", ".": "."}
+
+    def __init__(self, chr, start, end, sense, ID="", score=0):
         """Initialize attributes."""
         coords = sorted([int(start), int(end)])
         # This method for assigning chromosome should help avoid storage of redundant strings.
@@ -152,9 +155,9 @@ class Locus(object):
 
     def get_antisense_locus(self):
         """Get antisense locus."""
-        if self.sense == '.':
+        if self.sense == ".":
             return self
-        switch = {'+': '-', '-': '+'}
+        switch = {"+": "-", "-": "+"}
         return Locus(self.chr, self.start, self.end, switch[self.sense])
 
     def coords(self):
@@ -169,9 +172,11 @@ class Locus(object):
         """
         if self.chr != other_locus.chr:
             return False
-        if not(self.sense == '.' or
-               other_locus.sense == '.' or
-               self.sense == other_locus.sense):
+        if not (
+            self.sense == "."
+            or other_locus.sense == "."
+            or self.sense == other_locus.sense
+        ):
             return False
         if self.start > other_locus.end or other_locus.start > self.end:
             return False
@@ -185,9 +190,11 @@ class Locus(object):
         """
         if self.chr != other_locus.chr:
             return False
-        if not(self.sense == '.' or
-               other_locus.sense == '.' or
-               self.sense == other_locus.sense):
+        if not (
+            self.sense == "."
+            or other_locus.sense == "."
+            or self.sense == other_locus.sense
+        ):
             return False
         if self.start > other_locus.start or other_locus.end > self.end:
             return False
@@ -225,11 +232,12 @@ class Locus(object):
 
     def __str__(self):
         """Locus string representation."""
-        return self.chr + '(' + self.sense + '):' + '-'.join(map(str, self.coords()))
+        return self.chr + "(" + self.sense + "):" + "-".join(map(str, self.coords()))
 
 
 class LocusCollection(object):
     """A collection of locus objects used for querying large sets of loci."""
+
     def __init__(self, loci, window_size=50):
         """Initialize attributes."""
         # Top-level keys are chr, then strand, no space
@@ -243,8 +251,8 @@ class LocusCollection(object):
         """Add locus to the collection."""
         if lcs not in self.__loci:
             self.__loci[lcs] = None
-            if lcs.sense == '.':
-                chr_key_list = [lcs.chr + '+', lcs.chr + '-']
+            if lcs.sense == ".":
+                chr_key_list = [lcs.chr + "+", lcs.chr + "-"]
             else:
                 chr_key_list = [lcs.chr + lcs.sense]
             for chr_key in chr_key_list:
@@ -278,8 +286,8 @@ class LocusCollection(object):
         if old not in self.__loci:
             raise ValueError("Requested locus isn't in collection.")
         del self.__loci[old]
-        if old.sense == '.':
-            sense_list = ['+', '-']
+        if old.sense == ".":
+            sense_list = ["+", "-"]
         else:
             sense_list = [old.sense]
         for k in self.__get_key_range(old):
@@ -293,16 +301,25 @@ class LocusCollection(object):
     def __subset_helper(self, locus, sense):
         """"""
         sense = sense.lower()
-        if ['sense', 'antisense', 'both'].count(sense) != 1:
+        if ["sense", "antisense", "both"].count(sense) != 1:
             raise ValueError("Sense command invalid: '{}'.".format(sense))
         matches = dict()
-        senses = ['+', '-']
-        if locus.sense == '.' or sense == 'both':
-            def lamb(s): return True
-        elif sense == 'sense':
-            def lamb(s): return bool(s == locus.sense)
-        elif sense == 'antisense':
-            def lamb(s): return bool(s != locus.sense)
+        senses = ["+", "-"]
+        if locus.sense == "." or sense == "both":
+
+            def lamb(s):
+                return True
+
+        elif sense == "sense":
+
+            def lamb(s):
+                return bool(s == locus.sense)
+
+        elif sense == "antisense":
+
+            def lamb(s):
+                return bool(s != locus.sense)
+
         else:
             raise ValueError("Sense value was inappropriate: '{}'.".format(sense))
 
@@ -316,7 +333,7 @@ class LocusCollection(object):
 
         return matches.keys()
 
-    def get_overlap(self, locus, sense='sense'):
+    def get_overlap(self, locus, sense="sense"):
         """Returns all members of the collection that overlap the locus.
 
         :param sense: can be 'sense' (default), 'antisense', or 'both'.
@@ -325,15 +342,15 @@ class LocusCollection(object):
         matches = self.__subset_helper(locus, sense)
         # Now, get rid of the ones that don't really overlap
         real_matches = dict()
-        if sense == 'sense' or sense == 'both':
+        if sense == "sense" or sense == "both":
             for i in filter(lambda lcs: lcs.overlaps(locus), matches):
                 real_matches[i] = None
-        if sense == 'antisense' or sense == 'both':
+        if sense == "antisense" or sense == "both":
             for i in filter(lambda lcs: lcs.overlaps_antisense(locus), matches):
                 real_matches[i] = None
         return real_matches.keys()
 
-    def stitch_collection(self, stitch_window=1, sense='both'):
+    def stitch_collection(self, stitch_window=1, sense="both"):
         """Reduces the collection by stitching together overlapping loci.
 
         Returns a new collection. Initializing stichWindow to 1 helps collect directly adjacent
@@ -370,12 +387,12 @@ class LocusCollection(object):
                         overlap_coords += overlapping_locus.coords()
                         old_collection.remove(overlapping_locus)
                     overlap_coords = [int(x) for x in overlap_coords]
-                    if sense == 'both':
+                    if sense == "both":
                         locus = Locus(
                             locus.chr,
                             min(overlap_coords),
                             max(overlap_coords),
-                            '.',
+                            ".",
                             locus.id,
                         )
                     else:
@@ -393,9 +410,9 @@ class LocusCollection(object):
                             locus.end + stitch_window,
                             locus.sense,
                         ),
-                        sense
+                        sense,
                     )
-                locus.id = '{}_{}_lociStitched'.format(stitch_ticker, locus.id)
+                locus.id = "{}_{}_lociStitched".format(stitch_ticker, locus.id)
 
                 stitched_collection.append(locus)
 
@@ -409,13 +426,14 @@ class LocusCollection(object):
 # ========================LOCUS FUNCTIONS===========================
 # ==================================================================
 
+
 def make_search_locus(locus, up_search, down_search):
     """Takes a locus and expands it by a fixed upstream/downstream amount.
 
     Spits out the new larger locus.
 
     """
-    if locus.sense == '-':
+    if locus.sense == "-":
         search_locus = Locus(
             locus.chr,
             locus.start - down_search,
@@ -438,6 +456,7 @@ def make_search_locus(locus, up_search, down_search):
 # ==========================BAM CLASS===============================
 # ==================================================================
 
+
 def convert_bitwise_flag(flag):
     """Get strand from the flag."""
     if flag & 16:
@@ -447,12 +466,13 @@ def convert_bitwise_flag(flag):
 
 class Bam(object):
     """A class for a sorted and indexed bam file that allows easy analysis of reads."""
+
     def __init__(self, bam_file):
         """Initialize attributes."""
         self._bam = bam_file
 
         # Get the number of reads use idxstats instead of flagstat
-        command = '{} idxstats {}'.format('samtools', self._bam)
+        command = "{} idxstats {}".format("samtools", self._bam)
 
         stats = subprocess.Popen(
             command,
@@ -465,15 +485,16 @@ class Bam(object):
         stats.stdout.close()
 
         self._mapped_reads = sum(
-            [int(line.decode('utf-8').rstrip().split('\t')[-2]) for line in stat_lines]
+            [int(line.decode("utf-8").rstrip().split("\t")[-2]) for line in stat_lines]
         )
-        self._total_reads = (
-            self._mapped_reads +
-            int(stat_lines[-1].decode('utf-8').rstrip().split('\t')[-1])
+        self._total_reads = self._mapped_reads + int(
+            stat_lines[-1].decode("utf-8").rstrip().split("\t")[-1]
         )
 
         # Now get the readlength #check the first 1000 reads
-        view_command = '{} view {} chr1:90000000-100000000'.format('samtools', self._bam)
+        view_command = "{} view {} chr1:90000000-100000000".format(
+            "samtools", self._bam
+        )
         read_stats = subprocess.Popen(
             view_command,
             stdin=subprocess.PIPE,
@@ -485,7 +506,9 @@ class Bam(object):
         read_stats.stdout.close()
 
         if not read_stat_lines:  # try chrom names w/o the chr
-            view_command = '{} view {} 1:90000000-100000000'.format('samtools', self._bam)
+            view_command = "{} view {} 1:90000000-100000000".format(
+                "samtools", self._bam
+            )
             read_stats = subprocess.Popen(
                 view_command,
                 stdin=subprocess.PIPE,
@@ -496,9 +519,13 @@ class Bam(object):
             read_stat_lines = read_stats.stdout.readlines()
             read_stats.stdout.close()
 
-        self._read_lengths = uniquify([
-            len(line.decode('utf-8').split('\t')[9]) for line in read_stat_lines if len(line) > 0
-        ])
+        self._read_lengths = uniquify(
+            [
+                len(line.decode("utf-8").split("\t")[9])
+                for line in read_stat_lines
+                if len(line) > 0
+            ]
+        )
 
     def path(self):
         """Return bam file path."""
@@ -508,28 +535,21 @@ class Bam(object):
         """Get read lengths."""
         return self._read_lengths
 
-    def liquidate_locus(self, locus, n=1, sense='.', extension=0, mmr=False):
+    def liquidate_locus(self, locus, n=1, sense=".", extension=0, mmr=False):
         """Use bamliquidator on a locus."""
-        bamliquidator_cmd = (
-            'bamliquidator {} {} {} {} {} {} {}'.format(
-                self._bam,
-                locus.chr,
-                str(locus.start),
-                str(locus.end),
-                sense,
-                n,
-                extension,
-            )
+        bamliquidator_cmd = "bamliquidator {} {} {} {} {} {} {}".format(
+            self._bam, locus.chr, str(locus.start), str(locus.end), sense, n, extension,
         )
         bamliquidator_out = subprocess.Popen(
-            bamliquidator_cmd,
-            stdout=subprocess.PIPE,
-            shell=True,
+            bamliquidator_cmd, stdout=subprocess.PIPE, shell=True,
         )
-        score = [int(x.decode('utf-8').rstrip()) for x in bamliquidator_out.stdout.readlines()]
+        score = [
+            int(x.decode("utf-8").rstrip())
+            for x in bamliquidator_out.stdout.readlines()
+        ]
         if mmr:
             mmr_count = float(self._mapped_reads) / 1000000
-            score = [round(x/mmr_count, 4) for x in score]
+            score = [round(x / mmr_count, 4) for x in score]
 
         return score
 
@@ -542,6 +562,7 @@ class Bam(object):
 # by Peter Bengtsson
 # Used under a creative commons license
 # sourced from  here: http://www.peterbe.com/plog/uniqifiers-benchmark
+
 
 def uniquify(seq, idfun=None):
     """Makes a list unique.
@@ -567,17 +588,18 @@ def uniquify(seq, idfun=None):
 # =======================SEQUENCE FUNCTIONS=========================
 # ==================================================================
 
+
 def fetch_seq(directory, chrom, start, end, UCSC=False, line_breaks=True, header=True):
     """Fetches a sequence from a genome directory.
 
     The directory must contain individual chrom fasta files.
 
     """
-    file_name = os.path.join(directory, '{}{}'.format(chrom, '.fa'))
+    file_name = os.path.join(directory, "{}{}".format(chrom, ".fa"))
     header_offset = 0
     n_start = 0
     n_end = 0
-    with open_plus(file_name, 'r') as infile:
+    with open_plus(file_name, "r") as infile:
         if header:
             infile.seek(0)
             header_offset = len(infile.readline())
@@ -588,8 +610,8 @@ def fetch_seq(directory, chrom, start, end, UCSC=False, line_breaks=True, header
             infile.seek((start + n_start + header_offset))
         else:
             infile.seek((start - 1 + n_start + header_offset))
-        span = ((end + n_end - 1) - (start + n_start - 1))
+        span = (end + n_end - 1) - (start + n_start - 1)
         read = infile.read(span)
         if line_breaks:
-            read = read.replace('\n', '')
+            read = read.replace("\n", "")
         return read

@@ -2,6 +2,7 @@
 include LICENSE
 include README.md
 include CHANGELOG.rst
+include *.png
 # include package files
 recursive-include crc/annotation *
 # include tests and test files
