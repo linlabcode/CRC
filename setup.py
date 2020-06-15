@@ -23,7 +23,7 @@ setup(
     maintainer_email=about["__email__"],
     license=about["__license__"],
     packages=find_packages(exclude=["tests", "tests.*", "*.tests", "*.tests.*"]),
-    install_requires=["numpy>=1.14.5", "networkx>=1.8.1"],
+    install_requires=["numpy>=1.14.5", "networkx>=1.8.1,<=2.3"],
     extras_require={
         "package": ["twine", "wheel"],
         "test": [
